@@ -1,6 +1,21 @@
 
 
 
+/*if (!google.maps.Polyline.prototype.getNPtsInBounds)
+{
+  google.maps.Polyline.prototype.getNPtsInBounds = function(bounds)
+  {
+    var no = 0;
+    var path = this.getPath();
+    for (var i = 0; i < path.getLength(); i++)
+    {
+      if (bounds.contains(path.getAt(i))) no++;
+    }
+    return no;
+  }
+}*/
+
+
 (function(er, $, undefined)
 {
   // = private =
@@ -21,9 +36,20 @@
     $openerror.html('Error: '+text);
   }
 
-  function Trk(time, xml)
+  function Bounds(minlat, minlon, maxlat, maxlon)
   {
+    this.minlat = minlat;
+    this.minlon = minlon;
+    this.maxlat = maxlat;
+    this.maxlon = maxlon;
+  }
+
+  function Trk(user, email, time, bounds, xml)
+  {
+    this.user = user;
+    this.email = email;
     this.time = time;
+    this.bounds = bounds;
     this.xml = xml;
     this.pts = new Array();
   }
@@ -42,7 +68,7 @@
     }
   }
 
-  function load_tcx(file)
+  function load_gpx(file)
   {
     var reader = new FileReader();
 
@@ -50,30 +76,41 @@
     {
       var xml = $($.parseXML(e.target.result));
 
-      if (!xml.children('TrainingCenterDatabase').length)
+      xml.find('trk link').remove();
+
+      if (!xml.children('gpx').length || !xml.children('gpx').children('metadata').length)
       {
-        read_error('Not a TCX file');
+        read_error('Not a GPX file');
         return;
       }
 
-      var time = new Date(xml.find('Lap').attr('StartTime'));
+      var xbnds = xml.find('bounds').first();
+      var bounds = new Bounds
+      (
+          parseFloat(xbnds.attr('minlat')),
+          parseFloat(xbnds.attr('minlon')),
+          parseFloat(xbnds.attr('maxlat')),
+          parseFloat(xbnds.attr('maxlon'))
+      );
+      var meta = xml.find('metadata');
+      var user = meta.find('name').text();
+      var time = new Date(meta.children('time').text());
+      var xemail = meta.find('email').first();
+      var email = xemail.attr('id')+'@'+xemail.attr('domain');
 
-      trk = new Trk(time, xml);
+      trk = new Trk(user, email, time, bounds, xml);
 
-      $('#trk_sport').html('Sport: '+xml.find('Activity').attr('Sport'));
-      $('#trk_dist').html('Distance: '+xml.find('DistanceMeters').text()+' m');
-      $('#trk_time').html('Time: '+xml.find('TotalTimeSeconds').text()+' s');
-      $('#trk_cal').html('Energy: '+xml.find('Calories').text()+' cal');
-      $('#trk_date').html(time.toLocaleDateString()+', '+time.toLocaleTimeString());
-      $('#trk_cmnt').html(xml.find('Notes').text());
+      $('#trk_user').html(user);
+      $('#trk_email').html('('+email+')');
+      $('#trk_time').html(time.toLocaleDateString()+', '+time.toLocaleTimeString());
 
-      xml.find('Trackpoint').each(function(i)
+      xml.find('trkpt').each(function(i, ele)
       {
-        var $pos = $(this).children('Position');
-        var lat = parseFloat($pos.children('LatitudeDegrees').text());
-        var lon = parseFloat($pos.children('LongitudeDegrees').text());
-        var ele = parseFloat($(this).children('AltitudeMeters').text());
-        var time = new Date($(this).children('Time').text())
+        var e = $(ele);
+        var lat = parseFloat($(this).attr('lat'));
+        var lon = parseFloat($(this).attr('lon'));
+        var ele = parseFloat(e.children('ele').text());
+        var time = new Date(e.children('time').text())
         trk.pts.push(new Pt(lat, lon, ele, time));
       });
 
@@ -235,29 +272,29 @@
     }
   }
 
-  function save_tcx()
+  function save_gpx()
   {
     if (!trk.pts.length) return;
 
     //This is where jQuery's XML support gets quite ridiculous...
 
-    trk.xml.find('Track').remove();       // To remove any extra tracks and also to avoid loads of blank lines...
-    trk.xml.find('Lap').append($($.parseXML('<Track>\n</Track>\n')).children());
-    $trk = trk.xml.find('Track').first();
-    $trk.children('Trackpoint').remove();
+    $trk = trk.xml.find('trk').first();
+    $trk.children('trkseg').remove();
+    $trk.append($($.parseXML('<trkseg></trkseg>')).children());
+    $seg = $trk.children('trkseg');
 
     for (var i = 0; i < (trk.pts.length-1); i++)
     {
-      $trk.append($($.parseXML(
-        '          <Trackpoint>\n'+
-        '            <Time>'+trk.pts[i].time.toISOString()+'</Time>\n'+
-        '            <Position>\n'+
-        '              <LatitudeDegrees>'+trk.pts[i].lat+'</LatitudeDegrees>\n'+
-        '              <LongitudeDegrees>'+trk.pts[i].lon+'</LongitudeDegrees>\n'+
-        '            </Position>\n'+
-        (isNaN(trk.pts[i].ele) ? '' : '            <AltitudeMeters>'+trk.pts[i].ele+'</AltitudeMeters>\n')+
-        '          </Trackpoint>\n')).children());
+      $seg.append($($.parseXML('<trkpt lat="'+trk.pts[i].lat+'" lon="'+trk.pts[i].lon+'">\n'+
+        '  <time>'+trk.pts[i].time.toISOString()+'</time>\n'+
+        (isNaN(trk.pts[i].ele) ? '' : '  <ele>'+trk.pts[i].ele+'</ele>\n')+
+        '</trkpt>\n')).children());
     }
+
+    var last = trk.pts.length-1;
+    $trk.append($($.parseXML(
+        '<trkseg><trkpt lat="'+trk.pts[last].lat+'" lon="'+trk.pts[last].lon+'">'+
+        '<time>'+trk.pts[last].time.toISOString()+'</time></trkpt></trkseg>\n')).children());
 
     var xmlstring = '<?xml version="1.0" encoding="UTF-8"?>\n'+
     (new XMLSerializer().serializeToString(trk.xml.children()[0]));
@@ -287,16 +324,16 @@
 
     $("#dnd").filedrop({callback: function(file)
     {
-      load_tcx(file);
+      load_gpx(file);
     }});
 
-    $('#fileinput').change(function(e)
+    $('#gpxinput').change(function(e)
     {
       e.preventDefault();
-      load_tcx($('#fileinput')[0].files[0]);
+      load_gpx($('#gpxinput')[0].files[0]);
     });
 
-    $('#save').click(function() {save_tcx();});
+    $('#save').click(function() {save_gpx();});
     $('#close').click(function() {close();});
   }
 
