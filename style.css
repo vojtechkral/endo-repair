@@ -1,0 +1,110 @@
+
+
+
+html
+{
+  width: 100%;
+  height: 100%;
+  font-family: sans-serif;
+}
+
+body
+{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.gray
+{
+  color: #F0F0EB;
+}
+
+#screen
+{
+  background-color: #ffffff;
+  width: 85%;
+  height: 100%;
+  float: left;
+}
+
+
+#panelcnt
+{
+  color: #ffffff;
+  font-size: 16px;
+  background-color: #87AA14;
+  width: 15%;
+  height: 100%;
+  float: right;
+}
+
+#panel
+{
+  margin-left: 20px;
+}
+
+#panel h2, h4
+{
+  margin-bottom: 0;
+}
+
+#panel h6
+{
+  margin: 0;
+}
+
+.data
+{
+  font-size: 12px;
+  margin: 3px 3px 3px 20px;
+}
+
+.ctrls
+{
+  width: 90%;
+}
+
+#trk_user
+{
+  font-size: 16px;
+}
+
+#dnd
+{
+  color: #888888;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  float: left;
+}
+
+#dndmsg
+{
+  background-color: white;
+  font-size: 24px;
+  border: 5px #888888 dashed;
+  margin: 15% auto 0 auto;
+  padding-top: 3%;
+  width: 60%;
+  height: 30%;
+}
+
+#openerror
+{
+  color: red;
+}
+
+#privnote
+{
+  font-size: 12px;
+}
+
+#map
+{
+  display: none;
+  width: 100%;
+  height: 100%;
+  float: left;
+}

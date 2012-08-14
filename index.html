@@ -1,0 +1,46 @@
+
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/1998/REC-html40-19980424/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="style.css" rel="stylesheet" type="text/css" media="screen">
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="jquery.filedrop.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyBFajIHaE4wacSds92Whg59Cjh7EygisK0&sensor=false"></script>
+    <script type="text/javascript" src="editor.js"></script>
+    <title>Endo-repair</title>
+  </head>
+  <body>
+    <div id="screen">
+      <div id="dnd">
+        <div id="dndmsg">
+          <p>Open or drag'n'drop Endomondo GPX file here to edit</p>
+          <p><input type="file" id="gpxinput"></p>
+          <p id="openerror"></p>
+        </div>
+        <p id="privnote">Privacy note: This application will only load the file localy - none of your data are uploaded.</p>
+      </div>
+      <div id="map"></div>
+    </div>
+    <div id="panelcnt">
+      <div id="panel">
+        <h2 class="gray">Endo-repair</h2>
+        <h6 class="gray">Enomondo track repair tool</h6>
+        <h4 class="gray">Track author:</h4>
+          <p class="data" id="trk_user">-</p>
+          <p class="data" id="trk_email">-</p>
+        <h4 class="gray">Track date:</h4>
+          <p class="data" id="trk_time">-</p>
+        <p>&nbsp;</p>
+        <p>Zoom in on part of the track to show edit controls. Use right click to remove points.</p>
+        <p>&nbsp;</p>
+        <p>
+          <input type="button" class="ctrls" id="save" value="Save"><br>
+          <input type="button" class="ctrls" id="close" value="Close">
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
