@@ -1,0 +1,20 @@
+Endo-repair
+
+A small browser-based utility used to help Endomondo tracks
+that suffered from shitty smartphone GPS modules.
+
+You can try it out here:
+http://kral.hk/endo-repair/
+
+Usage: export a TCX file from Endomondo,
+load it into endo-repair, edit,
+save and import back to Endomondo.
+
+
+It works entirely in browser and on client side only,
+except for Google maps material.
+
+Nothing guaranteed, might not even work, it's really very simple.
+
+
+(c) by Vojtech 'Kralik' Kral
