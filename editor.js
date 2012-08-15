@@ -235,6 +235,7 @@
         polys[ip].getPath().push(trk.pts[i].latLng);
       }
     }
+    if (inview) poly_bind(polys[ip], polys[ip].erIdx);
   }
 
   function save_gpx()
