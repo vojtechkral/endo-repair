@@ -1,21 +1,6 @@
 
 
 
-/*if (!google.maps.Polyline.prototype.getNPtsInBounds)
-{
-  google.maps.Polyline.prototype.getNPtsInBounds = function(bounds)
-  {
-    var no = 0;
-    var path = this.getPath();
-    for (var i = 0; i < path.getLength(); i++)
-    {
-      if (bounds.contains(path.getAt(i))) no++;
-    }
-    return no;
-  }
-}*/
-
-
 (function(er, $, undefined)
 {
   // = private =
@@ -36,20 +21,11 @@
     $openerror.html('Error: '+text);
   }
 
-  function Bounds(minlat, minlon, maxlat, maxlon)
-  {
-    this.minlat = minlat;
-    this.minlon = minlon;
-    this.maxlat = maxlat;
-    this.maxlon = maxlon;
-  }
-
-  function Trk(user, email, time, bounds, xml)
+  function Trk(user, email, time, xml)
   {
     this.user = user;
     this.email = email;
     this.time = time;
-    this.bounds = bounds;
     this.xml = xml;
     this.pts = new Array();
   }
@@ -84,21 +60,13 @@
         return;
       }
 
-      var xbnds = xml.find('bounds').first();
-      var bounds = new Bounds
-      (
-          parseFloat(xbnds.attr('minlat')),
-          parseFloat(xbnds.attr('minlon')),
-          parseFloat(xbnds.attr('maxlat')),
-          parseFloat(xbnds.attr('maxlon'))
-      );
       var meta = xml.find('metadata');
       var user = meta.find('name').text();
       var time = new Date(meta.children('time').text());
       var xemail = meta.find('email').first();
       var email = xemail.attr('id')+'@'+xemail.attr('domain');
 
-      trk = new Trk(user, email, time, bounds, xml);
+      trk = new Trk(user, email, time, xml);
 
       $('#trk_user').html(user);
       $('#trk_email').html('('+email+')');
@@ -305,15 +273,20 @@
 
   function close()
   {
+    if (!trk) return;
     var r = confirm("Really close the track?\nAny unsaved work will be lost");
     if (!r) return;
 
     $map.hide();
     $dnd.show();
 
-    delete map;
-    delete polys;
-    delete trk;
+    map = undefined;
+    polys = undefined;
+    trk = undefined;
+
+    $('#trk_user').html('-');
+    $('#trk_email').html('-');
+    $('#trk_time').html('-');
   }
 
   function init()
@@ -331,6 +304,7 @@
     {
       e.preventDefault();
       load_gpx($('#gpxinput')[0].files[0]);
+      $('#gpxinput').val('');
     });
 
     $('#save').click(function() {save_gpx();});
