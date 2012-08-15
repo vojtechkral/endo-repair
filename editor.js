@@ -21,11 +21,8 @@
     $openerror.html('Error: '+text);
   }
 
-  function Trk(user, email, time, xml)
+  function Trk(xml)
   {
-    this.user = user;
-    this.email = email;
-    this.time = time;
     this.xml = xml;
     this.pts = new Array();
   }
@@ -60,16 +57,14 @@
         return;
       }
 
+      trk = new Trk(xml);
+
       var meta = xml.find('metadata');
-      var user = meta.find('name').text();
-      var time = new Date(meta.children('time').text());
+      var time = new Date(xml.find('trkpt').first().children('time').text());
       var xemail = meta.find('email').first();
-      var email = xemail.attr('id')+'@'+xemail.attr('domain');
 
-      trk = new Trk(user, email, time, xml);
-
-      $('#trk_user').html(user);
-      $('#trk_email').html('('+email+')');
+      $('#trk_user').html(meta.find('name').text());
+      $('#trk_email').html('('+xemail.attr('id')+'@'+xemail.attr('domain')+')');
       $('#trk_time').html(time.toLocaleDateString()+', '+time.toLocaleTimeString());
 
       xml.find('trkpt').each(function(i, ele)
@@ -110,6 +105,8 @@
     var bounds = new google.maps.LatLngBounds();
     for (var i = 0; i < trk.pts.length; i++) bounds.extend(trk.pts[i].latLng);
     map.fitBounds(bounds);
+
+    polys = new Array();
 
     google.maps.event.addListener(map, 'idle', function()
     {
