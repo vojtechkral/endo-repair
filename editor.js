@@ -170,7 +170,7 @@
 
     google.maps.event.addListener(poly, 'rightclick', function(e)
     {
-      if (e.vertex) path.removeAt(e.vertex);
+      if (e.vertex != undefined) path.removeAt(e.vertex);
     });
   }
 
@@ -240,6 +240,7 @@
 
   function save_gpx()
   {
+    if (!trk) return;
     if (!trk.pts.length) return;
 
     //This is where jQuery's XML support gets quite ridiculous...
